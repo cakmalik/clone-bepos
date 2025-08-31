@@ -1,0 +1,36 @@
+name: Laravel Release
+
+on:
+  push:
+    branches:
+      - dev-server
+
+jobs:
+  deploy_development:
+    name: Release web to development server
+    if: startsWith(github.event.head_commit.message, 'release-development:')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Deploy to development with SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEV_SSH_HOST }}
+          username: ${{ secrets.DEV_SSH_USERNAME }}
+          key: ${{ secrets.DEV_SSH_KEY }}
+          port: ${{ secrets.DEV_SSH_PORT }}
+          passphrase: ${{ secrets.DEV_SSH_PASSPHRASE }}
+          script_stop: true
+          script: |
+            cd public_html/dev-bepos-tab
+            php artisan down
+            git stash
+            git checkout dev-server
+            git pull origin dev-server
+            composer install
+            php artisan migrate --force
+            php artisan optimize
+            php artisan up

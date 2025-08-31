@@ -1,0 +1,44 @@
+.cust-brand {
+    width: 6.8rem !important;
+}
+
+.document-view {
+    font-family: "Times New Roman", serif;
+}
+
+.document-view td {
+    padding: 2px 5px;
+}
+
+.document-view table td {
+    border-color: #000 !important;
+}
+
+.font-weight-bold {
+    font-weight: 800;
+}
+
+.text-right {
+    text-align: right;
+}
+
+tr.trailing-tr, tr.trailing-tr td {
+    border: none;
+    padding: 5px !important;
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+        height: 0;
+    }
+
+    .document-view, .document-view * {
+        visibility: visible;
+        height: auto;
+    }
+}
+
+.bg-green-smooth {
+  background-color: #1E2A3B
+}
