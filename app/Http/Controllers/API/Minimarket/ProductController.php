@@ -79,6 +79,8 @@ class ProductController extends Controller
 
     public function getProductByBarcode($code)
     {
+        $outletId = Auth::user()?->userOutlets?->first()?->outlet_id;
+
         $products = DB::table('products')
             ->join('product_stocks', 'product_stocks.product_id', '=', 'products.id')
             ->join('product_prices', 'product_prices.product_id', '=', 'products.id')
@@ -86,6 +88,7 @@ class ProductController extends Controller
             ->where('products.deleted_at', null)
             ->where('product_prices.type', 'utama')
             ->where('products.barcode', $code)
+            ->where('product_stocks.outlet_id', $outletId)
             ->select(
                 'products.id',
                 'products.barcode',
@@ -100,9 +103,11 @@ class ProductController extends Controller
                 'product_prices.price',
                 'product_stocks.stock_current',
                 'product_units.symbol as unit_symbol'
+
             )
             ->limit(1)
             ->get();
+
 
         $products = $products->map(function ($product) {
             $product->discount_collection = ProductDiscount::where('product_id', $product->id)
@@ -126,7 +131,7 @@ class ProductController extends Controller
             $product->is_support_qty_decimal = $product->is_support_qty_decimal ? true : false;
 
             $variantPrices = ProductPrice::where('product_id', $product->id)
-                ->with('sellingPrice:id,name') 
+                ->with('sellingPrice:id,name')
                 ->get(['id', 'product_id', 'price', 'type', 'selling_price_id']);
 
             if ($variantPrices->count() > 1) {
@@ -211,7 +216,7 @@ class ProductController extends Controller
                 'product_units.symbol as unit_symbol'
             )
             ->limit($request->query('limit') ?? 10)
-            ->get()->map(function($row) {
+            ->get()->map(function ($row) {
                 $row->stock_current = formatDecimal($row->stock_current);
 
                 return $row;
@@ -264,7 +269,7 @@ class ProductController extends Controller
             $product->unit_symbol            = $product->unit_symbol;
 
             $variantPrices = ProductPrice::where('product_id', $product->id)
-                ->with('sellingPrice:id,name') 
+                ->with('sellingPrice:id,name')
                 ->get(['id', 'product_id', 'price', 'type', 'selling_price_id']);
 
             if ($variantPrices->count() > 1) {
